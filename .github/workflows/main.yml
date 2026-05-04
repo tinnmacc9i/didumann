@@ -72,15 +72,27 @@ jobs:
         pip install --upgrade pymongo
         pip install --upgrade python-xlib
 
-    # Brave browser installation step:
-    - name: Install Brave Browser
+
+    - name: Add Brave signing key
       run: |
-        echo "Installing Brave browser..."
-        sudo apt install -y curl
-        curl -fsSL https://brave-browser-archive.s3.amazonaws.com/deb/brave-browser-release.asc | sudo gpg --dearmor > /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-archive.s3.amazonaws.com/deb/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-        sudo apt update
-        sudo apt install -y brave-browser
+        sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg \
+        https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+
+    - name: Add Brave repository
+      run: |
+        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] \
+        https://brave-browser-apt-release.s3.brave.com/ stable main" | \
+        sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+
+    - name: Update apt
+      run: sudo apt update
+
+    - name: Install Brave
+      run: sudo apt install brave-browser -y
+
+    - name: Verify Brave
+      run: brave-browser --version
+
 
     # Install chromedriver
     - name: Install chromedriver
